@@ -13,15 +13,14 @@ import qrcode
 # import PIL
 import random
 import traceback
+import datetime
 
 from backend.models import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 def index(request):
     return render(requset, 'index.html')
-
 
 def admin_send_ajax(request):
     print("admin send ajax")
@@ -36,10 +35,6 @@ def admin_send_ajax(request):
     except Exception as e:
         response['status'] = 'failed'
     return JsonResponse(response)
-
-
-
-
 
 def register_ajax(request):
     print("register ajax")
@@ -110,7 +105,6 @@ def login_ajax(request):
     print(response)
     return JsonResponse(response)
 
-
 def person_info_ajax(request):
     print("personal information")
     response = {}
@@ -134,7 +128,6 @@ def person_info_ajax(request):
     except Exception as e:
         response['status'] = 'failed'
     return JsonResponse(response)
-
 
 def modify_ajax(request):
     print("modify information")
@@ -165,7 +158,6 @@ def modify_ajax(request):
     except Exception as e:
         response['status'] = 'failed'
     return JsonResponse(response)
-
 
 def modify_password_ajax(request):
     print("modify password")
@@ -198,8 +190,6 @@ def modify_password_ajax(request):
     return JsonResponse(response)
 
 ##课程列表 ajax
-
-
 def classlist_ajax(request):
     print("get classlist password")
     response = {}
@@ -223,11 +213,13 @@ def classlist_ajax(request):
         response['failed_reason'] = 'failed due to exception'
     return JsonResponse(response)
 ##公告列表ajax
+#TODO: 要修改
 def msglist_ajax(request):
     response = {}
     try:
         class_id = request.session['classid']
         lesson=Lessons.objects.get(id=class_id)
+
         response['tableData'] =lesson.get_msg_list()
         response['status'] = 'success'
     except Exception as e:
@@ -236,6 +228,7 @@ def msglist_ajax(request):
         response['failed_reason'] = 'failed due to exception'
 
     return JsonResponse(response)
+#TODO: 接收公告
 
 ##文件列表ajax
 def filelist_ajax(request):
@@ -252,7 +245,6 @@ def filelist_ajax(request):
 
     return JsonResponse(response)
 
-
 ##分组这部分我没有完全按照你的那种要求,我感觉你的要求有点奇怪
 # 这个函数是添加分组
 def group_add(request):
@@ -263,7 +255,7 @@ def group_add(request):
         lessons_id=request.session['classid']
         lessons=Lessons.object.get(id=lessons_id)
         new_group=Group(group_id=group_id,lessons=lessons)
-        for username in user_list:
+        for username in json.loads(user_list):
             student=UserProfile.objects.filter(username=username)
             new_group.users.add(student)
         new_group.save()
@@ -288,6 +280,7 @@ def group_dismiss(request):
     return JsonResponse(response)
 
 #返回分组的所有成员
+#TODO: username realname
 def group_display(request):
     response = {}
     try:
@@ -300,7 +293,7 @@ def group_display(request):
         response['status'] = 'failed'
         response['failed_reason'] = 'failed due to exception'
     return JsonResponse(response)
-
+#TODO: 
 def groups_in_lessons(request):
     response = {}
     try:
@@ -312,7 +305,7 @@ def groups_in_lessons(request):
             st_dict={}
             st_dict['username']=s.username
             st_dict['realname']=s.realname
-            group_id=Group.objects.filter(users=s,lessons=lessons)
+            group_id=Group.objects.filter(users=s,lessons=lessons).group_id
             st_dict['group_id']=group_id
             student_info_list.append(st_dict)
         response['tableData'] = student_info_list
@@ -334,16 +327,30 @@ def assignment_distribute(request):
         checking_list_raw=request.session['list']
         checking_permission=request.session['permission'] #yes or no
         checking_list = []
+        users_list=list(Lessons.objects.get(lesson_name=lessons_name).students.all())
+        user_status={}
+        for user in users_list:
+            user_status[user.username]=-1
+        user_status=str(user_status)
         if checking_permission =="no":
-            pass  #
+            for item in json.loads(checking_list_raw):
+                start=datetime.datetime.strptime(item['starttime'], "%Y-%m-%d %H:%M")
+                end=datetime.datetime.strptime(item['endtime'], "%Y-%m-%d %H:%M")
+                cnt=item['cnt']
+                timespan=(end-start).total_seconds()/cnt
+                tmp_start=start
+                for i in range(cnt):
+                    new_dict = {}
+                    tmp_end=tmp_start+timespan
+                    new_dict['starttime']=tmp_start
+                    new_dict['endtime'] =tmp_end
+                    new_dict['cnt']=1
+                    checking_list.append(new_dict)
+                    tmp_start=tmp_end
         else:
-
-            checking_dict={}
-            time_span=checking_list_raw[0]+checking_list_raw[1]
-            checking_dict[time_span]=checking_list_raw[-1]
-            checking_list.append(checking_dict)
+            checking_list=checking_list_raw
         assignment=Assignment(distributor=distributor,lessons_name=lessons_name,title=title,ddl=ddl,context=context,
-                              checking_list=checking_list,checking_permission=checking_permission)
+                              checking_list=checking_list,checking_permission=checking_permission,user_status=user_status)
         assignment.save()
         response['status'] = 'success'
     except Exception as e:
@@ -352,8 +359,90 @@ def assignment_distribute(request):
         response['failed_reason'] = 'failed due to exception'
     return JsonResponse(response)
 
-def assignment_display(request):
+def assignment_display_for_user(request):
+    response = {}
+    try:
+        username=request.session['username']
+        lesson_name=request.session['lessonname']
+        lesson=Lessons.objects.get(lesson_name=lesson_name)
+        assignment_list=list(Assignment.objects.filter(lessons=lesson))
+        result=[]
+        for item in assignment_list:
+            tmp_result={}
+            tmp_result['title']=item.title
+            tmp_result['ddl']=item.ddl
+            tmp_result['hwid']=item.hwid
+            tmp_result['distributor']=item.distributor
+            tmp_result['modify_time']=item.modify_time.strftime("%Y-%m-%d %H:%M")
+            status=json.loads(item.userstatus)
+            if status[username]==-1:
+                tmp_result['upload_status']=False
+            else:
+                tmp_result['upload_status'] =True
+            result.append(tmp_result)
+        response['result']=result
+        response['status'] = 'success'
+    except Exception as e:
+        print(repr(e))
+        response['status'] = 'failed'
+        response['failed_reason'] = 'failed due to exception'
+    return JsonResponse(response)
 
+
+def assignment_check(request):
+    response = {}
+    try:
+        username = request.session['username']
+        lesson_name = request.session['lessonname']
+        lesson = Lessons.objects.get(lesson_name=lesson_name)
+        hwid=request.session['hwid']
+        assignment=Assignment.objects.get(hwid=hwid)
+        tmp_result={}
+        tmp_result['title'] = assignment.title
+        tmp_result['ddl'] = assignment.ddl
+        tmp_result['hwid'] = assignment.hwid
+        tmp_result['distributor'] = assignment.distributor
+        tmp_result['modify_time'] = assignment.modify_time.strftime("%Y-%m-%d %H:%M")
+        tmp_result['userstatus'] = assignment.userstatus
+        tmp_result['checking_list'] = assignment.checking_list
+        tmp_result['context'] = assignment.context
+        response['result']=json.dumps(tmp_result)
+        response['status'] = 'success'
+    except Exception as e:
+        print(repr(e))
+        response['status'] = 'failed'
+        response['failed_reason'] = 'failed due to exception'
+    return JsonResponse(response)
+# pre: 在这个作业的userstatus中 当前user的值为-1
+def assignment_upload(request):
+    response = {}
+    try:
+        username = request.session['username']
+        lesson_name = request.session['lessonname']
+        lesson = Lessons.objects.get(lesson_name=lesson_name)
+        hwid = request.session['hwid']
+        index=request.session['index']
+        assignment = Assignment.objects.get(hwid=hwid)
+        checking_dict=json.loads(assignment.checking_list)[index]
+        limitation=checking_dict['cnt']
+        curr_status=json.loads(assignment.userstatus)
+
+        count_tmp=0
+        for v in list(curr_status.values()):
+            if(v==index):count_tmp+=1
+        if(count_tmp<limitation):
+            curr_status[username]=index
+            assignment.userstatus=json.dumps(curr_status)
+            assignment.save()
+            response['status'] = 'success'
+        else:
+            response['status'] = 'filed'
+            response['failed_reason'] = 'upload exceed the limitation'
+    except Exception as e:
+        print(repr(e))
+        response['status'] = 'failed'
+        response['failed_reason'] = 'failed due to exception'
+    return JsonResponse(response)
 
 def assignment_remove(request):
     response = {}
@@ -362,6 +451,50 @@ def assignment_remove(request):
         lessons_name = request.session['lessonname']
         title = request.session['title']
         Assignment.objects.filter(distributor=distributor,lessons_name=lessons_name,title=title)[0].delete()
+        response['status'] = 'success'
+    except Exception as e:
+        print(repr(e))
+        response['status'] = 'failed'
+        response['failed_reason'] = 'failed due to exception'
+    return JsonResponse(response)
+
+def chat_save(request):
+    response={}
+    try:
+        username = request.session['username']
+       # lesson_name = request.session['lessonname']
+        group_id = request.session['groupid']
+        context = request.session['ctx']
+        group=Group.objects.get(group_id=group_id)
+        user=UserProfile.objects.get(username=username)
+        chat=Chat(group=group,user=user,context=context)
+        chat.save()
+        response['status'] = 'success'
+    except Exception as e:
+        print(repr(e))
+        response['status'] = 'failed'
+        response['failed_reason'] = 'failed due to exception'
+    return JsonResponse(response)
+
+def chat_record(request):
+    response = {}
+    try:
+        username = request.session['username']
+        lesson_name = request.session['lessonname']
+        lesson=Lessons.objects.get(lesson_name=lesson_name)
+        user = UserProfile.objects.get(username=username)
+        group=Group.objects.get(lessons=lesson,users=user)
+        group_id = group.group_id
+        chatlist=[]
+        for chat in list(Chat.objects.filter(group=group)):
+            tmp_dict={}
+            tmp_dict['username']=chat.user.username
+            tmp_dict['realname'] = chat.user.realname
+            tmp_dict['ctx']=chat.ctx
+            tmp_dict['time']=chat.modify_time.strftime("%Y-%m-%d %H:%M")
+            chatlist.append(tmp_dict)
+        response['group_id']=group_id
+        response['chatlist']=chatlist
         response['status'] = 'success'
     except Exception as e:
         print(repr(e))

@@ -15,8 +15,8 @@ class UserProfile(models.Model):
     password = models.CharField('Password', max_length = 64)
     email = models.CharField('Email', max_length = 64, blank = True)
     telephone = models.CharField('Telephone', max_length = 64, blank = True)
-#there are four kinds if permission : normal, interviewer, teamAdministrator and topAdministrator
-    # permission = models.CharField('Permission',max_length = 64,default = 'normal')
+    #there are four kinds if permission : normal, interviewer, teamAdministrator and topAdministrator
+    permission = models.CharField('Permission',max_length = 64,default = 'normal')
 
     #user_status = models.CharField(max_length=1, choices=STATUS,default='S')
 
@@ -107,6 +107,7 @@ class Notice(models.Model):
     teachers=models.CharField('Instructor',max_length=64)
     create_time = models.DateTimeField('Sent time',auto_now=True)
     msgid=models.CharField('Lesson Id',max_length=64,default=hash(notice_title))
+    context=models.CharField('Context',max_length=100000,blank=True)
     lessons = models.ForeignKey(Lessons, on_delete=models.CASCADE)
     class Meta:
         db_table='Notice'
@@ -120,11 +121,12 @@ class Assignment(models.Model):
     title=models.CharField("Assignment Title",max_length=128,default="No title",blank=True)
     lessons=models.ForeignKey(Lessons,on_delete=models.CASCADE)
     ddl=models.CharField("DeadLine",max_length=64,blank=True)
+    hwid=models.CharField("Homework Id",max_length=64,blank=True)
     context=models.CharField("Context",max_length=1000000,blank=True)
     checking_permission=models.CharField("Permission",max_length=20,blank=False)
     checking_list=models.CharField("Check List",max_length=100000,blank=True)  #一个检查list,每个元素是一个字典,key为时间段,value 为最大检查数量
     userstatus=models.CharField("User Status",max_length=1000000,blank=True)
-    #includedFiles
+    modify_date = models.DateTimeField('Last modified', auto_now=True)
     class Meta:
         db_table='Assignment'
         ordering = ['title']
@@ -158,3 +160,16 @@ class Group(models.Model):
     def get_user_list(self):
         return ','.join([i.user_name for i in self.user.all()])
 
+
+
+class Chat(models.Model):
+    group=models.ForeignKey(Group, on_delete=models.CASCADE)
+    chat_id=models.CharField('Chat Id',max_length=64,blank=True)
+    user=models.ForeignKey(UserProfile,on_delete=models.CASCADE)
+    modify_time=models.DateTimeField('Last modified', auto_now = True)
+    context=models.CharField('Context',max_length=10000,blank=True)
+    class Meta:
+        db_table='Chat'
+        ordering = ['chat_id']
+    def __str__(self):
+        return self.chat_id
