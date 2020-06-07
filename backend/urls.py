@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'class_list_ajax$', views.classlist_ajax, ),
     url(r'msglist_ajax$', views.msglist_ajax, ),
     url(r'fileslist_ajax$', views.filelist_ajax, ),
+    url(r'add_notice_ajax$', views.add_notice, ),
     url(r'group_add_ajax$', views.group_add, ),
     url(r'group_dismiss_ajax$', views.group_dismiss, ),
     url(r'group_display_ajax$', views.group_display, ),

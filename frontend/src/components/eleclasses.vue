@@ -49,10 +49,10 @@ export default {
   data() {
     return {
       tableData: [
-        { classname: "课程1", teacher: "老师1", time: "时间1", classid: "1"},
-        { classname: "课程2", teacher: "老师2", time: "时间2", classid: "2"},
-        { classname: "课程3", teacher: "老师3", time: "时间3", classid: "3"},
-        { classname: "课程4", teacher: "老师4", time: "时间4", classid: "4"}
+        { classname: "课程1", teacher: "老师1", time: "时间1", id: "1"},
+        { classname: "课程2", teacher: "老师2", time: "时间2", id: "2"},
+        { classname: "课程3", teacher: "老师3", time: "时间3", id: "3"},
+        { classname: "课程4", teacher: "老师4", time: "时间4", id: "4"}
       ],
       keywords: ""
     };
@@ -87,7 +87,7 @@ export default {
     handleClick(row, idx) {
       console.log(row)
       console.log(idx)
-      var url = '/classlist/'+this.tableData[idx].classid+'/msglist';
+      var url = '/classlist/'+this.tableData[idx].id+'/msglist';
 
       this.$router.push(url);
     },
@@ -114,9 +114,10 @@ export default {
     getinfo: function () {
       var _this = this
       $.ajax({
-        type: 'get',
+        type: 'post',
         url: '/api/classlist_ajax',
         contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({username: window.sessionStorage.login}),
         dataType: 'json',
         success: function (data) {
           _this.tableData = data.tableData;
@@ -131,7 +132,9 @@ export default {
     }
   },
   created () {
-    this.getinfo()
+    this.getinfo();
+    //console.log(this.tableData);
+    //console.log(this.tableData[0]);
   }
 };
 </script>

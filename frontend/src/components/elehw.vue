@@ -1,9 +1,17 @@
 <template>
   <!-- 创建要控制的区域 -->
   <div id="app">
-    <h3>公告列表</h3>
+    <div class="panel panel-primary" >
+      <div class="panel-heading">
+        <h3 class="panel-title">作业列表</h3>
+      </div>
+      <div class="panel-body form-inline" v-if="isteacher">
+        <input type="button" value="发布作业" class="btn btn-primary" @click="add">
+      </div>
+    </div>
 
     <el-table
+    v-if="isteacher"
     :data="tableData"
     border
     stripe
@@ -12,26 +20,74 @@
       prop="title"
       label="作业标题"
       align = "center"
-      width="300">
+      width="200">
     </el-table-column>
     <el-table-column
       prop="teacher"
       label="发布者"
       align = "center"
-      width="200">
+      width="120">
     </el-table-column>
     <el-table-column
       prop="time"
-      label="发布时间"
+      label="提交截止时间"
       align = "center"
-      width="300">
+      width="120">
     </el-table-column>
     <el-table-column
-      label="预约时间"
+      label="查看详情"
+      align = "center"
+      width="120">
+      <template slot-scope="scope">
+        <el-button @click="handleClickTeacher(scope.row, scope.$index)" type="text" size="medium">点击查看</el-button>
+      </template>
+    </el-table-column>
+    <el-table-column
+      label="删除作业"
+      align = "center"
+      width="120">
+      <template slot-scope="scope">
+        <el-button @click="handleClickDelete(scope.row, scope.$index)" type="text" size="medium">点击删除</el-button>
+      </template>
+    </el-table-column>
+  </el-table>
+
+    <el-table
+    v-else-if="!isteacher"
+    :data="tableData"
+    border
+    stripe
+    style="width: 100%">
+    <el-table-column
+      prop="title"
+      label="作业标题"
       align = "center"
       width="200">
+    </el-table-column>
+    <el-table-column
+      prop="teacher"
+      label="发布者"
+      align = "center"
+      width="120">
+    </el-table-column>
+    <el-table-column
+      prop="time"
+      label="提交截止时间"
+      align = "center"
+      width="120">
+    </el-table-column>
+    <el-table-column
+      prop="submitted"
+      label="提交状态"
+      align = "center"
+      width="120">
+    </el-table-column>
+    <el-table-column
+      label="提交作业"
+      align = "center"
+      width="120">
       <template slot-scope="scope">
-        <el-button @click="handleClick(scope.row, scope.$index)" type="text" size="medium">点击查看</el-button>
+        <el-button @click="handleClick(scope.row, scope.$index)" type="text" size="medium" :disabled="tableData[scope.$index].passddl">点击查看</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -46,19 +102,23 @@ export default {
   data() {
     return {
       tableData: [
-        { title: "标题1", teacher: "老师1", time: "时间1", msgid: "1"},
-        { title: "标题2", teacher: "老师2", time: "时间2", msgid: "2"},
-        { title: "标题3", teacher: "老师3", time: "时间3", msgid: "3"},
-        { title: "标题4", teacher: "老师4", time: "时间4", msgid: "4"}
+        { title: "标题1", teacher: "老师1", time: "时间1", msgid: "1", passddl: false, submitted: "已提交"},
+        { title: "标题2", teacher: "老师2", time: "时间2", msgid: "2", passddl: false, submitted: "已提交"},
+        { title: "标题3", teacher: "老师3", time: "时间3", msgid: "3", passddl: false, submitted: "已提交"},
+        { title: "标题4", teacher: "老师4", time: "时间4", msgid: "4", passddl: true, submitted: "未提交"}
       ],
-      keywords: ""
+      keywords: "",
+      isteacher: window.sessionStorage.isteacher
     };
   },
   methods: {
     add() {
       // vue中已经实现了数据的双向绑定，每当我们修改了data中的数据，Vue会默认监听到
       // 数据的改动，自动把最新的数据，应用到页面上
-      this.list.push({ id: this.id, name: this.name, ctime: new Date() });
+      var url = this.$route.path;
+      var px = url.lastIndexOf('/');
+      var newurl = url.substr(0, px) + "/pubhw";
+      this.$router.push(newurl);
     },
 
     del(id) {
@@ -84,28 +144,22 @@ export default {
     handleClick(row, idx) {
       console.log(row)
       console.log(idx)
-      var url = this.$route.path+'/'+this.tableData[idx].msgid;
+      var url = this.$route.path+this.tableData[idx].msgid;
       this.$router.push(url);
     },
 
-    search(keywords) {
-      var newList = [];
-      // this.list.forEach(item => {
-      //     if (item.name.indexOf(keywords) != -1) {
-      //         newList.push(item)
-      //     }
-      // });
-      // return newList;
 
-      // forEach some fliter findIndex 这些都属于数组的新方法，
-      // 都会对数组的每一项，进行遍历，执行相关的操作
-      return this.list.filter(item => {
-        //注意:在ES6中，为字符串提供了一个新方法，叫做 String.prototype.includes("要包含的字符串")
-        // 如果包含，返回true，反之false
-        if (item.name.includes(keywords)) {
-          return item;
-        }
-      });
+
+    handleClickTeacher(row, idx) {
+      console.log(row)
+      console.log(idx)
+    },
+
+
+
+    handleClickDelete(row, idx) {
+      console.log(row)
+      console.log(idx)
     },
     getinfo: function () {
       var _this = this
@@ -129,6 +183,7 @@ export default {
   },
   created () {
     //this.getinfo()
+    this.isteacher = false;
   }
 };
 </script>

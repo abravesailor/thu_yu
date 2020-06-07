@@ -1,7 +1,7 @@
 <template>
   <!-- 创建要控制的区域 -->
   <div id="app">
-    <div class="panel panel-primary">
+    <div class="panel panel-primary" v-if="isteacher">
       <div class="panel-heading">
         <h3 class="panel-title">学生管理</h3>
       </div>
@@ -11,11 +11,12 @@
     </div>
 
     <el-table
-    :data="tableData"
+    v-if="isteacher"
+    :data="realData"
     border
     stripe
     ref = "mulTable"
-    @selection-change="handleSelectionChange"
+    @select="handleSelect"
     style="width: 100%">
     <el-table-column
       prop="id"
@@ -36,12 +37,33 @@
       width="200">
     </el-table-column>
     <el-table-column
-      label="取消分组"
+      label="解散小组"
       align = "center"
       width="200">
       <template slot-scope="scope">
-        <el-button @click="delgroup(scope.$index)" type="text" size="medium">取消分组</el-button>
+        <el-button @click="delgroup(scope.$index)" type="text" size="medium" :disabled="realData[scope.$index].isZero">解散小组</el-button>
       </template>
+    </el-table-column>
+  </el-table>
+
+    <el-table
+    v-else-if="!isteacher"
+    :data="tableData"
+    border
+    stripe
+    ref = "mulTable"
+    style="width: 100%">
+    <el-table-column
+      prop="id"
+      label="所在组别"
+      align = "center"
+      width="300">
+    </el-table-column>
+    <el-table-column
+      prop="name"
+      label="学生姓名"
+      align = "center"
+      width="200">
     </el-table-column>
   </el-table>
 
@@ -50,86 +72,151 @@
 
 
 <script>
-import bar from './bar'
 export default {
   name: "classes",
   data() {
     return {
       tableData: [
-        { id: "无组别", name: "学生1", groupid: 0 },
-        { id: "无组别", name: "学生2", groupid: 0 },
-        { id: "无组别", name: "学生3", groupid: 0 },
-        { id: "无组别", name: "学生4", groupid: 0 }
+        { id: "无组别", name: "学生1", groupid: 0},
+        { id: "组别1", name: "学生2", groupid: 1},
+        { id: "组别2", name: "学生3", groupid: 2},
+        { id: "组别2", name: "学生4", groupid: 2}
       ],
       keywords: "",
-      groupcount: 0,
+      groupcount: 2,
       msg: "还没",
-      checked: []
+      checked: [],
+      isteacher: window.sessionStorage.isteacher
     };
   },
+  computed:
+  {
+      realData: function()
+      {
+        var ret = []
+        var tmp = this.tableData.sort(this.sortNumber);
+        //console.log(tmp);
+        var groupcnt = 1;
+        for (var i = 0; i < tmp.length; i++)
+        {
+          if (tmp[i].groupid == 0)
+          {
+            tmp[i].realid = 0;
+            continue;
+          }
+          tmp[i].realid = groupcnt;
+          if ((i == tmp.length - 1) || (tmp[i].groupid != tmp[i + 1].groupid))
+          {
+            groupcnt++;
+          }
+        }
+        for (var i = 0; i < tmp.length; i++)
+        {
+          if (tmp[i].realid == 0)
+          {
+            tmp[i].id = "无组别";
+            tmp[i].isZero = true;
+          }
+          else
+          {
+            tmp[i].id = "组别" + tmp[i].realid.toString();
+            tmp[i].isZero = false;
+          }
+        }
+        return tmp;
+      }
+  },
   methods: {
+    sortNumber(a, b)
+    {
+      if (a.groupid == b.groupid)
+      {
+        //("chucuo");
+        return (a.name > b.name);
+      }
+      else
+      {
+        //console.log("chucuole");
+        if (a.groupid == 0)
+        {
+          return true;
+        }
+        else
+        {
+           if (b.groupid == 0)
+          {
+            return false;
+          }
+        }
+        return a.groupid > b.groupid;
+      }
+    },
+    checkZero(val)
+    {
+      if (realData[val].groupid == 0)
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    },
     add() {
       if (this.checked.length == 0)
       {
-        return
+        return;
       }
       var i = 0
-      this.tableData.forEach(item => {
 
-        if (this.checked.indexOf(item) != -1)
-        {
-          this.delgroup(i)
-        }
-        i = i + 1
-      })
       this.groupcount++;
       this.tableData.forEach(item => {
         if (this.checked.indexOf(item) != -1)
         {
           item.groupid = this.groupcount
-          item.id = "组别" + item.groupid.toString()
         }
       })
-      console.log("tmp")
-      console.log(this.checked)
-      var ele = document.getElementsByTagName("input")
-        for (var i = 0; i < ele.length; i++)
-        {
-          ele[i].checked = false;
-        }
         this.checked = []
         this.$refs.mulTable.clearSelection();
-      this.msg = "没了"
     },
 
     delgroup(idxx) {
+
       var idx = idxx
-      console.log(idx)
+      this.$confirm('确认解散该学生所在小组?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var gid = this.tableData[idx].groupid
+      
+          for (var i = 0; i < this.tableData.length; i++)
+          {
+          if (this.tableData[i].groupid == gid)
+          {
+            this.tableData[i].groupid = 0;
+          }
+          }
+          this.$message({
+            type: 'success',
+            message: '解散成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
+      //console.log(idx)
       var gid = this.tableData[idx].groupid
-      var flag = false
+      
       for (var i = 0; i < this.tableData.length; i++)
       {
-        if (i != idx && this.tableData[i].groupid == gid)
+        if (this.tableData[i].groupid == gid)
         {
-          flag = true
-          break
+          this.tableData[i].groupid = 0;
         }
       }
-      if (flag == false)
-      {
-        for (var i = 0; i < this.tableData.length; i++)
-        {
-           if (this.tableData[i].groupid > gid)
-           {
-             this.tableData[i].groupid--
-             this.tableData[i].id = "组别"+this.tableData[i].groupid.toString()
-           }
-        }
-        this.groupcount--
-      }
-
-      this.tableData[idx].groupid = 0
-      this.tableData[idx].id = "无组别"
     },
 
     del(id) {
@@ -151,9 +238,34 @@ export default {
       this.tableData.splice(index, 1);
       
     },
-    handleSelectionChange(val) {
-        this.checked = val;
+    handleSelect(val, row) {
+
+        
+        if (row.groupid != 0)
+        {
+          this.$alert('无法选择该成员，因为该成员已被分组', '错误选择', {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$refs.mulTable.toggleRowSelection(row);
+          }
+          });
+        }
+        else
+        {
+          this.checked = val;
+        }
       },
+
+
+    getInfo()
+    {
+      //
+      //ajax
+      //
+      //console.log(this.realData);
+      //console.log("isteacher?:"+this.$store.state.isteacher);
+
+    },
 
     search(keywords) {
       var newtableData = [];
@@ -174,7 +286,14 @@ export default {
         }
       });
     }
-  }
+  },
+  created()
+  {
+    //console.log(this.$store.state.isteacher);
+    console.log(this.$store.state.collapsed);
+    console.log("&&&")
+    this.getInfo();
+  },
 };
 </script>
 

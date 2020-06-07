@@ -13,7 +13,7 @@ let _uvCxt = new UserViexCxt(_busCxt.userCxt)
 let _mvCxt = new MsgViewCxt()
 
 let opt = {
-  state: {collapsed: false, topNavState: 'home', leftNavState: 'home'},
+  state: {collapsed: false, topNavState: 'home', leftNavState: 'home', isteacher: false},
   getters: null,
   mutations: null,
   actions: null

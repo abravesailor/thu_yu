@@ -7,10 +7,10 @@
                   <el-form-item label="用户名：" prop="username">
                     <el-input v-model="ruleForm.username" placeholder="4~8 个字符，作为登陆使用"></el-input>
                   </el-form-item>
-                  <el-form-item label="性别：" prop="sex">
+                  <el-form-item label="身份：" prop="sex">
                     <el-select v-model="ruleForm.sex" placeholder="请选择您的性别">
-                      <el-option label="男" value="男"></el-option>
-                      <el-option label="女" value="女"></el-option>
+                      <el-option label="学生" value="男"></el-option>
+                      <el-option label="老师" value="女"></el-option>
                     </el-select>
                   </el-form-item>
                   <el-form-item label="真实姓名：" prop="realname">
@@ -25,6 +25,7 @@
                   <el-form-item>
                     <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
+                    <el-button @click="goback()">返回</el-button>
                   </el-form-item>
                 </div>
                 <div class="rightbox">
@@ -164,6 +165,10 @@ export default {
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()
+    },
+    goback ()
+    {
+      this.$router.push('/')
     },
     submitForm: function (formName) {
       var _this = this

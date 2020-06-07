@@ -7,15 +7,7 @@
       </div>
       <div class="topbar-title">
         <!-- 注意：这里就是topNavState作用之处，根据当前路由所在根路由的type值判断显示不同顶部导航菜单 -->
-        <el-row v-show="$store.state.topNavState==='home'">
-          <el-col :span="24">
-            <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect" :router="true">
-              <el-menu-item index="/">课程列表</el-menu-item>
-            </el-menu>
-          </el-col>
-        </el-row>
-
-        <el-row v-show="$store.state.topNavState==='classlist'">
+        <el-row>
           <el-col :span="24">
             <el-menu :default-active="defaultActiveIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect" :router="true">
               <el-menu-item index="/">课程列表</el-menu-item>
@@ -29,10 +21,10 @@
             <i class="iconfont icon-user"></i> {{nickname}}   <i class="el-icon-caret-bottom"></i></span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>
-              <div @click="jumpTo('/user/profile')"><span style="color: #555;font-size: 14px;">个人信息</span></div>
+              <div @click="jumpTo('/profile')"><span style="color: #555;font-size: 14px;">个人信息</span></div>
             </el-dropdown-item>
             <el-dropdown-item>
-              <div @click="jumpTo('/user/changepwd')"><span style="color: #555;font-size: 14px;">修改密码</span></div>
+              <div @click="jumpTo('/changepwd')"><span style="color: #555;font-size: 14px;">修改密码</span></div>
             </el-dropdown-item>
             <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
@@ -53,7 +45,8 @@
         nickname: '',
         defaultActiveIndex: '/',
         homeMenu: false,
-        messageCount: 5
+        messageCount: 5,
+        isteacher: true
       }
     },
     created() {
@@ -69,14 +62,17 @@
           this.$router.push(url);
         }
       });
+
       // 组件创建完后获取数据
       this.fetchNavData();
+      console.log(this.$store.state.topNavState)
     },
     methods: {
       jumpTo(url){
         this.$router.push(url); //用go刷新
       },
       handleSelect(index){
+        console.log(index);
         this.defaultActiveIndex = index;
       },
       fetchNavData () { // 初始化菜单激活项
@@ -90,6 +86,10 @@
               
               var flag = true;
               var cjp = routers[i].path + '/' + children[j].path;
+              if (routers[i].path == '/')
+              {
+                cjp = '/' + children[j].path;
+              }
               var cjsz = cjp.split('/');
               var cursz = cur_path.split('/');
               if (cjsz.length === cursz.length)
@@ -108,6 +108,7 @@
                 flag = false;
               }
               //console.log(children[j].path);
+              //console.log(cjp)
               //console.log(cur_path);
               //console.log(flag);
               if (flag) {
@@ -129,6 +130,11 @@
             }
           }
         }
+        //console.log("*****")
+        //console.log(nav_type)
+        //console.log(nav_name)
+        //console.log("*****")
+
         this.$store.state.topNavState = nav_type;
         this.$store.state.leftNavState = nav_name;
         if(nav_type == "home"){
@@ -159,6 +165,6 @@
         console.info("to.path:" + to.path);
         this.fetchNavData();
       }
-    }
+    },
   }
 </script>

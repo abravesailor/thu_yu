@@ -9,6 +9,7 @@
         <el-row>
           <el-col :span="12"><input type="button" value="预约时间" class="btn btn-primary" @click="add"></el-col>
           <el-col :span="30">已预约时间： {{dated}} </el-col>
+          <el-col :span="30"><el-button @click="handleClick()">点击返回</el-button></el-col>
         
       </el-row>
       </div>
@@ -54,7 +55,6 @@
 
 
 <script>
-import bar from './bar'
 export default {
   name: "classes",
   data() {
@@ -172,6 +172,14 @@ export default {
 
         this.$refs.mulTable.toggleRowSelection(prev);
         this.checked = now;
+      },
+      handleClick()
+      {
+        var url = this.$route.path;
+        var px = url.lastIndexOf('/');
+        var newurl = url.substr(0, px) + "/hw";
+
+        this.$router.push(newurl);
       },
 
     search(keywords) {

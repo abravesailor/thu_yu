@@ -1,37 +1,52 @@
 <template>
   <!-- 创建要控制的区域 -->
-  <div id="app">
-    <h3>公告列表</h3>
-
+    <div id="app">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">公告列表</h3>
+      </div>
+      <div class="panel-body form-inline" v-if="isteacher">
+        <input type="button" value="发布公告" class="btn btn-primary" @click="add">
+      </div>
+    </div>
     <el-table
     :data="tableData"
     border
     stripe
     style="width: 100%">
     <el-table-column
-      prop="title"
+      prop="msg_title"
       label="公告标题"
-      align = "center"
-      width="300">
-    </el-table-column>
-    <el-table-column
-      prop="teacher"
-      label="发布者"
       align = "center"
       width="200">
     </el-table-column>
     <el-table-column
-      prop="time"
+      prop="teachers"
+      label="发布者"
+      align = "center"
+      width="150">
+    </el-table-column>
+    <el-table-column
+      prop="create_time"
       label="发布时间"
       align = "center"
-      width="300">
+      width="150">
     </el-table-column>
     <el-table-column
       label="查看详情"
       align = "center"
-      width="200">
+      width="150">
       <template slot-scope="scope">
         <el-button @click="handleClick(scope.row, scope.$index)" type="text" size="medium">点击查看</el-button>
+      </template>
+    </el-table-column>
+    <el-table-column
+      v-if="isteacher"
+      label="删除公告"
+      align = "center"
+      width="150">
+      <template slot-scope="scope">
+        <el-button @click="del(scope.$index)" type="text" size="medium">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -46,19 +61,22 @@ export default {
   data() {
     return {
       tableData: [
-        { title: "标题1", teacher: "老师1", time: "时间1", msgid: "1"},
-        { title: "标题2", teacher: "老师2", time: "时间2", msgid: "2"},
-        { title: "标题3", teacher: "老师3", time: "时间3", msgid: "3"},
-        { title: "标题4", teacher: "老师4", time: "时间4", msgid: "4"}
+        { msg_title: "标题1", teachers: "老师1", create_time: "时间1", msgid: "1", context: "公告1的内容是XXXX"},
+        { msg_title: "标题2", teachers: "老师2", create_time: "时间2", msgid: "2", context: "公告2的内容是XXXX"},
+        { msg_title: "标题3", teachers: "老师3", create_time: "时间3", msgid: "3", context: "公告3的内容是XXXX"},
+        { msg_title: "标题4", teachers: "老师4", create_time: "时间4", msgid: "4", context: "公告4的内容是XXXX"}
       ],
-      keywords: ""
+      keywords: "",
+      isteacher: window.sessionStorage.isteacher
     };
   },
   methods: {
     add() {
-      // vue中已经实现了数据的双向绑定，每当我们修改了data中的数据，Vue会默认监听到
-      // 数据的改动，自动把最新的数据，应用到页面上
-      this.list.push({ id: this.id, name: this.name, ctime: new Date() });
+      var url = this.$route.path;
+      var px = url.lastIndexOf('/');
+      var newurl = url.substr(0, px) + "/pubmsg";
+      this.$router.push(newurl);
+      
     },
 
     del(id) {
@@ -82,8 +100,16 @@ export default {
     },
 
     handleClick(row, idx) {
-      console.log(row)
-      console.log(idx)
+      console.log(row);
+      console.log(idx);
+
+
+
+      this.$alert(this.tableData[idx].context, this.tableData[idx].msg_title, {
+          confirmButtonText: '确定',
+          callback: action => {
+          }
+        });
     },
 
     search(keywords) {
@@ -106,15 +132,20 @@ export default {
       });
     },
     getinfo: function () {
-      var _this = this
+      var _this = this;
+      console.log(this.$route.params.classid);
+      console.log(window.sessionStorage.login);
       $.ajax({
-        type: 'get',
+        type: 'post',
         url: '/api/msglist_ajax',
         contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({classid: this.$route.params.classid}),
+        data: JSON.stringify({'username': window.sessionStorage.login, 'classid': this.$route.params.classid}),
         dataType: 'json',
         success: function (data) {
           _this.tableData = data.tableData;
+          console.log("***");
+          console.log(data.tableData);
+          console.log("***");
         },
         error: function (data) {
           _this.$notify({
@@ -127,6 +158,7 @@ export default {
   },
   created () {
     this.getinfo()
+    console.log(this.tableData);
   }
 };
 </script>

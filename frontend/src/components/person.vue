@@ -24,10 +24,6 @@
         <label>手机号：</label>
         <label class="shower">{{ phonenumber }}</label>
     </div>
-    <div class="inputbox" v-if="seen">
-        <label>录取结果：</label>
-        <label class="shower">您已经被{{ hav }}录取！</label>
-    </div>
     <div class="inputbox">
         <label>用户简介：</label>
         <label class="tes">{{ intro }}</label>
@@ -42,13 +38,13 @@ export default {
   data () {
     return {
       seen: false,
-      username: '',
-      email: '',
-      major: '',
-      phonenumber: '',
-      intro: '',
-      realname: '',
-      sex: ''
+      username: 'admin',
+      email: 'admin@thu.edu.cn',
+      major: '计算机',
+      phonenumber: '18801112345',
+      intro: '这个人什么都没写',
+      realname: '王逸凡',
+      sex: '男'
     }
   },
   methods: {
@@ -87,7 +83,7 @@ export default {
     }
   },
   created () {
-    this.getinfo()
+    //this.getinfo()
   }
 }
 </script>
@@ -119,7 +115,7 @@ label{
   margin-left: 25%;
   margin-top: 1%;
   height: 10%;
-  width: 40%;
+  width: 50%;
 }
 .textbox{
   height: 60%;

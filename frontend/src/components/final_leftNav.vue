@@ -12,16 +12,13 @@
         <!-- 注意：这里就是leftNavState状态作用之处，当该值与router的根路由的name相等时加载相应菜单组 -->
         <template v-if="issue.name === $store.state.leftNavState">
           <template v-for="(item,index) in issue.children">
-            <el-submenu v-if="!item.leaf" :index="index+''" v-show="item.menuShow">
-              <template slot="title"><i :class="item.iconCls"></i><span slot="title">{{item.name}}</span></template>
-              <el-menu-item v-for="term in item.children" :key="term.path" :index="term.path" v-if="term.menuShow"
-                            :class="$route.path===term.path?'is-active':''">
-                <i :class="term.iconCls"></i><span slot="title">{{term.name}}</span>
-              </el-menu-item>
-            </el-submenu>
-            <el-menu-item v-else-if="item.leaf" :index="item.path"
+            <el-menu-item v-if="$store.state.isteacher" :index="item.path"
                           :class="$route.path===item.path?'is-active':''" v-show="item.menuShow">
               <i :class="item.iconCls"></i><span slot="title">{{item.name}}</span>
+            </el-menu-item>
+            <el-menu-item v-else-if="!$store.state.isteacher" :index="item.path"
+                          :class="$route.path===item.path?'is-active':''" v-show="item.menuShow">
+              <i :class="item.iconCls"></i><span slot="title">{{item.stuname}}</span>
             </el-menu-item>
           </template>
         </template>
@@ -36,6 +33,7 @@
       return {
         loading: false,
         collapsed: this.$store.state.collapsed,
+        isteacher: this.$store.state.isteacher
       }
     },
     methods: {
@@ -85,5 +83,9 @@
     mounted() {
       this.defaultLeftNavOpened();
     },
+    created()
+    {
+      console.log(this.$store.state.leftNavState);
+    }
   }
 </script>

@@ -17,8 +17,8 @@
       </el-form-item>
       <!--<el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>-->
       <el-form-item class="extra-text">
-        <a href="javascript:;" class="forget-pwd" title="找回密码">忘记密码?</a>
         <router-link :to="{path: '/register'}" class="reg-text" title="立即注册">立即注册</router-link>
+        <font color="#FFFFFF">忘记密码?</font>
       </el-form-item>
       <el-form-item style="width:100%;">
         <el-button type="primary" style="width:100%;" @click.native.prevent="handleLogin" :disabled="allowLogin" :loading="loading">登录</el-button>
@@ -121,12 +121,15 @@
         ses.setItem('login', username)
         ses.setItem('password', password)
         //ses.setItem('auth', data.permission)
+        this.$store.state.isteacher = true;
+        ses.setItem('isteacher', true);
         if (window.sessionStorage.login === username) {
           _this.$router.push('/classes')
         }
       }
       else
       {
+        success = true;
       if (success === true) {
         $.ajax({
           type: 'post',
@@ -140,7 +143,7 @@
               var ses = window.sessionStorage
               ses.setItem('login', username)
               ses.setItem('password', password)
-              ses.setItem('auth', data.permission)
+              ses.setItem('isteacher', data.permission)
               if (window.sessionStorage.login === username) {
                 _this.$router.push('/classes')
               }
@@ -238,8 +241,7 @@
     color: #29e;
   }
   .extra-text .reg-text {
-    position: absolute;
+    position: center;
     top: 4px;
-    right: 2px;
   }
 </style>

@@ -226,7 +226,7 @@ def msglist_ajax(request):
             tmp_dict['msg_title']=msg.notice_title
             tmp_dict['create_time']=msg.create_time
             tmp_dict['context']=msg.context
-            tmp_dict['msgid']=msg.msgid
+            #tmp_dict['msgid']=msg.msgid
             tmp_dict['teachers'] = msg.teachers
             msg_list.append(tmp_dict)
         response['tableData'] = msg_list
