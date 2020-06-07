@@ -55,7 +55,9 @@ let router = new Router({
           },
           leaf: true, // 只有一个节点
           iconCls: 'iconfont icon-home', // 图标样式class
-          menuShow: true
+          menuShow: true,
+          teacherShow: true,
+          studentShow: true,
         },
         {
           path: 'profile',
@@ -68,7 +70,9 @@ let router = new Router({
           },
           leaf: true, // 只有一个节点
           iconCls: 'iconfont icon-home', // 图标样式class
-          menuShow: false
+          menuShow: false,
+          teacherShow: false,
+          studentShow: false,
         },
         {
           path: 'changepwd',
@@ -81,7 +85,9 @@ let router = new Router({
           },
           leaf: true, // 只有一个节点
           iconCls: 'iconfont icon-home', // 图标样式class
-          menuShow: false
+          menuShow: false,
+          teacherShow: false,
+          studentShow: false,
         }
       ]
     },
@@ -92,6 +98,8 @@ let router = new Router({
       component: Home,
       redirect: '/classlist/:classid/msglist',
       menuShow: true,
+      teacherShow: true,
+      studentShow: true,
       children: [
         {
           path: 'msglist',
@@ -104,7 +112,9 @@ let router = new Router({
           },
           leaf: true,
           iconCls: 'el-icon-menu',
-          menuShow: true
+          menuShow: true,
+          teacherShow: true,
+          studentShow: true,
         },
         {
           path: 'pubmsg',
@@ -117,7 +127,9 @@ let router = new Router({
           },
           leaf: true,
           iconCls: 'el-icon-menu',
-          menuShow: false
+          menuShow: false,
+          teacherShow: false,
+          studentShow: false,
         },
         {
           path: 'filelist',
@@ -130,7 +142,9 @@ let router = new Router({
           },
           leaf: true,
           iconCls: 'el-icon-folder',
-          menuShow: true
+          menuShow: true,
+          teacherShow: true,
+          studentShow: true,
         },
         {
           path: 'group',
@@ -143,7 +157,9 @@ let router = new Router({
           },
           leaf: true,
           iconCls: 'el-icon-user',
-          menuShow: true
+          menuShow: true,
+          teacherShow: true,
+          studentShow: false,
         },
         {
           path: 'hw',
@@ -157,6 +173,8 @@ let router = new Router({
           leaf: true,
           iconCls: 'el-icon-s-flag',
           menuShow: true,
+          teacherShow: true,
+          studentShow: true,
         },
         {
           path: 'pubhw',
@@ -169,7 +187,9 @@ let router = new Router({
           },
           leaf: true,
           iconCls: 'el-icon-menu',
-          menuShow: false
+          menuShow: false,
+          teacherShow: false,
+          studentShow: false,
         },
         {
           path: ':hwid',
@@ -183,6 +203,8 @@ let router = new Router({
           leaf: true,
           iconCls: 'el-icon-s-flag',
           menuShow: false,
+          teacherShow: false,
+          studentShow: false,
         },
 
       ]

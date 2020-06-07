@@ -67,7 +67,7 @@ export default {
         { msg_title: "标题4", teachers: "老师4", create_time: "时间4", msgid: "4", context: "公告4的内容是XXXX"}
       ],
       keywords: "",
-      isteacher: window.sessionStorage.isteacher
+      isteacher: Boolean(Number(window.sessionStorage.isteacher))
     };
   },
   methods: {
@@ -80,23 +80,30 @@ export default {
     },
 
     del(id) {
-      // 根据Id删除数据
-      // this.list.some((item, i) => {
-      //     if (item.id == id) {
-      //         this.list.splice(i, 1)
-      //         // 在数组的 some 方法中，如果return true ，就会立即终止这个数组的后续循环
-      //         return true
-      //     }
-      // })
-      /*
-      let index = this.list.findIndex(item => {
-        if (item.id == id) {
-          return true;
-        }
-      });
-
-      this.list.splice(index, 1);
-      */
+      this.$confirm('确认删除该公告?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var gid = this.tableData[idx].groupid
+      
+          for (var i = 0; i < this.tableData.length; i++)
+          {
+          if (this.tableData[i].groupid == gid)
+          {
+            this.tableData[i].groupid = 0;
+          }
+          }
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
     },
 
     handleClick(row, idx) {
@@ -157,6 +164,20 @@ export default {
     }
   },
   created () {
+    console.log("isteacher?");
+    console.log(window.sessionStorage.isteacher);
+    if (this.isteacher)
+    {
+      console.log(this.isteacher)
+      console.log("isteacher shi true")
+    };
+    console.log(typeof(this.isteacher));
+    console.log(typeof(window.sessionStorage.isteacher));
+    if (window.sessionStorage.isteacher)
+    {
+      console.log(this.isteacher)
+      console.log("isteacher youshi true")
+    }
     this.getinfo()
     console.log(this.tableData);
   }

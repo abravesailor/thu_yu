@@ -65,7 +65,7 @@
       width="200">
     </el-table-column>
     <el-table-column
-      prop="teacher"
+      prop="distributor"
       label="发布者"
       align = "center"
       width="120">
@@ -102,13 +102,13 @@ export default {
   data() {
     return {
       tableData: [
-        { title: "标题1", teacher: "老师1", time: "时间1", msgid: "1", passddl: false, submitted: "已提交"},
-        { title: "标题2", teacher: "老师2", time: "时间2", msgid: "2", passddl: false, submitted: "已提交"},
-        { title: "标题3", teacher: "老师3", time: "时间3", msgid: "3", passddl: false, submitted: "已提交"},
-        { title: "标题4", teacher: "老师4", time: "时间4", msgid: "4", passddl: true, submitted: "未提交"}
+        { title: "标题1", distributor: "老师1", ddl: "时间1", msgid: "1", passddl: false, submitted: "已提交"},
+        { title: "标题2", distributor: "老师2", ddl: "时间2", msgid: "2", passddl: false, submitted: "已提交"},
+        { title: "标题3", distributor: "老师3", ddl: "时间3", msgid: "3", passddl: false, submitted: "已提交"},
+        { title: "标题4", distributor: "老师4", ddl: "时间4", msgid: "4", passddl: true, submitted: "未提交"}
       ],
       keywords: "",
-      isteacher: window.sessionStorage.isteacher
+      isteacher: Boolean(Number(window.sessionStorage.isteacher))
     };
   },
   methods: {
@@ -164,13 +164,14 @@ export default {
     getinfo: function () {
       var _this = this
       $.ajax({
-        type: 'get',
-        url: '/api/hwlist_ajax',
+        type: 'post',
+        url: '/api/assignment_display_for_user_ajax',
         contentType: 'application/json; charset=utf-8',
-        data: JSON.stringify({classid: this.$route.params.classid}),
+        data: JSON.stringify({classid: this.$route.params.classid, username: window.sessionStorage.login}),
         dataType: 'json',
         success: function (data) {
-          _this.tableData = data.tableData;
+          _this.tableData = data.result;
+          console.log(_this.tableData);
         },
         error: function (data) {
           _this.$notify({
@@ -182,8 +183,8 @@ export default {
     }
   },
   created () {
-    //this.getinfo()
-    this.isteacher = false;
+    this.getinfo()
+    //this.isteacher = false;
   }
 };
 </script>

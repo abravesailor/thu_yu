@@ -85,7 +85,7 @@ def login_ajax(request):
             #print('permission||||' + user_profile.permission)
             #判断密码是否正确
             if (user_profile.password == password):
-                response['permission'] = 'S'
+                response['permission'] = user_profile.permission
                 response['status'] = 'success'
                 response['username'] = username
             else:
@@ -214,6 +214,7 @@ def classlist_ajax(request):
 ##公告列表ajax
 #TODO: 要修改  要检查!!
 def msglist_ajax(request):
+    print("msglist_ajax")
     response = {}
     try:
         class_id = json.loads(request.body.decode('utf-8'))['classid']
@@ -274,16 +275,28 @@ def filelist_ajax(request):
 ##分组这部分我没有完全按照你的那种要求,我感觉你的要求有点奇怪
 # 这个函数是添加分组
 def group_add(request):
+    print("group_add")
     response = {}
     try:
         user_list=json.loads(request.body.decode('utf-8'))['userlist']
+        print(user_list)
         group_id=json.loads(request.body.decode('utf-8'))['group_id']
         lessons_id=json.loads(request.body.decode('utf-8'))['classid']
         lessons=Lessons.objects.get(id=lessons_id)
         new_group=Group(group_id=group_id,lessons=lessons)
-        for username in json.loads(user_list):
-            student=UserProfile.objects.filter(username=username)
+        for username2 in user_list:
+            username = str(username2)
+            print(username+'aaa')
+            student=UserProfile.objects.get(username=str(username))
+            print("***")
+            print(student)
+            print(type(student))
+            print("***")
+            #print(username)
+            print("&&&")
             new_group.users.add(student)
+            print("&&&")
+            #print(username)
         new_group.save()
         response['status'] = 'success'
     except Exception as e:
@@ -332,7 +345,8 @@ def groups_in_lessons(request):
     response = {}
     try:
         class_id = json.loads(request.body.decode('utf-8'))['classid']
-        lessons=Lessons.objects.get(class_id=class_id)
+        print(class_id)
+        lessons=Lessons.objects.get(id=class_id)
         students=list(lessons.students.all())
         student_info_list=[]
         for s in students:

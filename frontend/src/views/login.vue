@@ -143,7 +143,14 @@
               var ses = window.sessionStorage
               ses.setItem('login', username)
               ses.setItem('password', password)
-              ses.setItem('isteacher', data.permission)
+              //ses.setItem('isteacher', data.permission)
+              if (data.permission == "True")
+                ses.setItem('isteacher', 1);
+              else ses.setItem('isteacher', 0);
+              console.log("permission:")
+              console.log(data.permission);
+              console.log(window.sessionStorage.isteacher);
+              console.log(typeof(window.sessionStorage.isteacher));
               if (window.sessionStorage.login === username) {
                 _this.$router.push('/classes')
               }
@@ -152,6 +159,7 @@
               _this.$notify({
               title: '提示',
               message: data.failed_reason
+
             })
             }
           },

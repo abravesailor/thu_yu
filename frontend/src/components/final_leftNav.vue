@@ -12,12 +12,12 @@
         <!-- 注意：这里就是leftNavState状态作用之处，当该值与router的根路由的name相等时加载相应菜单组 -->
         <template v-if="issue.name === $store.state.leftNavState">
           <template v-for="(item,index) in issue.children">
-            <el-menu-item v-if="$store.state.isteacher" :index="item.path"
-                          :class="$route.path===item.path?'is-active':''" v-show="item.menuShow">
+            <el-menu-item v-if="isteacher" :index="item.path"
+                          :class="$route.path===item.path?'is-active':''" v-show="item.teacherShow">
               <i :class="item.iconCls"></i><span slot="title">{{item.name}}</span>
             </el-menu-item>
-            <el-menu-item v-else-if="!$store.state.isteacher" :index="item.path"
-                          :class="$route.path===item.path?'is-active':''" v-show="item.menuShow">
+            <el-menu-item v-else-if="!isteacher" :index="item.path"
+                          :class="$route.path===item.path?'is-active':''" v-show="item.studentShow">
               <i :class="item.iconCls"></i><span slot="title">{{item.stuname}}</span>
             </el-menu-item>
           </template>
@@ -33,7 +33,7 @@
       return {
         loading: false,
         collapsed: this.$store.state.collapsed,
-        isteacher: this.$store.state.isteacher
+        isteacher: Boolean(Number(window.sessionStorage.isteacher))
       }
     },
     methods: {
@@ -86,6 +86,8 @@
     created()
     {
       console.log(this.$store.state.leftNavState);
+      console.log("isteacher:")
+      console.log(this.isteacher)
     }
   }
 </script>
