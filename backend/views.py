@@ -54,7 +54,7 @@ def register_ajax(request):
         print(user_status)
         user_profile = UserProfile(username=username, password=password, email=email, telephone=telephone,
                                    employeeID=employeeID, major=major, real_name=real_name, sex=sex)
-        #user_profile.pri = json.dumps([])
+        #user_profile.pri = []
         print(username)
         print(password)
         print("reg*************")
@@ -85,7 +85,7 @@ def login_ajax(request):
             #print('permission||||' + user_profile.permission)
             #判断密码是否正确
             if (user_profile.password == password):
-                request.session['login_id'] = user_profile.id
+                json.loads(request.body.decode('utf-8'))['login_id'] = user_profile.id
                 response['permission'] = 'S'
                 response['status'] = 'success'
                 response['username'] = username
@@ -110,7 +110,7 @@ def person_info_ajax(request):
     response = {}
     try:
         print(request.body)
-        user_profile_id = request.session['login_id']
+        user_profile_id = json.loads(request.body.decode('utf-8'))['login_id']
         user_profile = UserProfile.objects.get(id = user_profile_id)
         print(user_profile)
         response['username'] = user_profile.username
@@ -135,7 +135,7 @@ def modify_ajax(request):
     try:
 
         print(request.body)
-        user_profile_id = request.session['login_id']
+        user_profile_id = json.loads(request.body.decode('utf-8'))['login_id']
         user_profile = UserProfile.objects.get(id = user_profile_id)
 
         print(user_profile)
@@ -165,7 +165,7 @@ def modify_password_ajax(request):
     response = {}
     try:
         print(request.body)
-        user_profile_id = request.session['login_id']
+        user_profile_id = json.loads(request.body.decode('utf-8'))['login_id']
         user_profile = UserProfile.objects.get(id = user_profile_id)
 
         password = json.loads(request.body.decode('utf-8'))['password']
@@ -194,7 +194,7 @@ def classlist_ajax(request):
     print("get classlist password")
     response = {}
     try:
-        user_profile_id = request.session['login_id']
+        user_profile_id = json.loads(request.body.decode('utf-8'))['login_id']
         user_profile = UserProfile.objects.get(id = user_profile_id)
         lessons_set=Lessons.objects.filter(students=user_profile)
         lessons_list=[]
@@ -217,7 +217,7 @@ def classlist_ajax(request):
 def msglist_ajax(request):
     response = {}
     try:
-        class_id = request.session['classid']
+        class_id = json.loads(request.body.decode('utf-8'))['classid']
         lesson=Lessons.objects.get(id=class_id)
         messages=list(Notice.objects.filter(lessons=lesson))
         msg_list=[]
@@ -227,8 +227,9 @@ def msglist_ajax(request):
             tmp_dict['create_time']=msg.create_time
             tmp_dict['context']=msg.context
             tmp_dict['msgid']=msg.msgid
+            tmp_dict['teachers'] = msg.teachers
             msg_list.append(tmp_dict)
-        response['tableData'] = json.dumps(msg_list)
+        response['tableData'] = msg_list
         response['status'] = 'success'
     except Exception as e:
         print(repr(e))
@@ -240,12 +241,11 @@ def msglist_ajax(request):
 def add_notice(request):
     response = {}
     try:
-        class_id = request.session['classid']
-        notice_title = request.session['msg_title']
-        context = request.session['context']
-        msgid = request.session['msgid']
+        class_id = json.loads(request.body.decode('utf-8'))['classid']
+        notice_title = json.loads(request.body.decode('utf-8'))['msg_title']
+        context = json.loads(request.body.decode('utf-8'))['context']
         lesson = Lessons.objects.get(id=class_id)
-        notice=Notice(notice_title=notice_title,context=context,msgid=msgid,lessons=lesson)
+        notice=Notice(notice_title=notice_title,context=context,lessons=lesson)
         notice.save()
         response['status'] = 'success'
     except Exception as e:
@@ -260,7 +260,7 @@ def add_notice(request):
 def filelist_ajax(request):
     response = {}
     try:
-        class_id = request.session['classid']
+        class_id = json.loads(request.body.decode('utf-8'))['classid']
         lesson=Lessons.objects.get(id=class_id)
         response['tableData'] =lesson.get_file_list()
         response['status'] = 'success'
@@ -276,9 +276,9 @@ def filelist_ajax(request):
 def group_add(request):
     response = {}
     try:
-        user_list=request.session['userlist']
-        group_id=request.session['group_id']
-        lessons_id=request.session['classid']
+        user_list=json.loads(request.body.decode('utf-8'))['userlist']
+        group_id=json.loads(request.body.decode('utf-8'))['group_id']
+        lessons_id=json.loads(request.body.decode('utf-8'))['classid']
         lessons=Lessons.object.get(id=lessons_id)
         new_group=Group(group_id=group_id,lessons=lessons)
         for username in json.loads(user_list):
@@ -296,7 +296,7 @@ def group_add(request):
 def group_dismiss(request):
     response = {}
     try:
-        group_id = request.session['group_id']
+        group_id = json.loads(request.body.decode('utf-8'))['group_id']
         Group.objects.filter(id=group_id).delete()
         response['status'] = 'success'
     except Exception as e:
@@ -310,7 +310,7 @@ def group_dismiss(request):
 def group_display(request):
     response = {}
     try:
-        groupId = request.session['groupid']
+        groupId = json.loads(request.body.decode('utf-8'))['groupid']
         studentList=list(Group.objects.get(id=groupId).users.all())
         result = []
         if len(studentList)!=0:
@@ -320,7 +320,7 @@ def group_display(request):
                 user_dict['realname']=s.realname
                 user_dict['group_id']=groupId
                 result.append(user_dict)
-            response['tableData'] = json.dumps(result)
+            response['tableData'] = result
         response['status'] = 'success'
     except Exception as e:
         print(repr(e))
@@ -331,7 +331,7 @@ def group_display(request):
 def groups_in_lessons(request):
     response = {}
     try:
-        lessons_id = request.session['classid']
+        lessons_id = json.loads(request.body.decode('utf-8'))['classid']
         lessons=Lessons.object.get(id=lessons_id)
         students=list(lessons.students.all())
         student_info_list=[]
@@ -347,7 +347,7 @@ def groups_in_lessons(request):
 
             st_dict['group_id']=group_id
             student_info_list.append(st_dict)
-        response['tableData'] = json.dumps(student_info_list)
+        response['tableData'] = student_info_list
         response['status'] = 'success'
     except Exception as e:
         print(repr(e))
@@ -358,19 +358,19 @@ def groups_in_lessons(request):
 def assignment_distribute(request):
     response = {}
     try:
-        distributor=request.session['username']
-        lessons_name=request.session['lessonname']
-        title=request.session['title']
-        ddl=request.session['ddl']
-        context=request.session['context']
-        checking_list_raw=request.session['list']
-        checking_permission=request.session['permission'] #yes or no
+        distributor=json.loads(request.body.decode('utf-8'))['username']
+        lessons_name=json.loads(request.body.decode('utf-8'))['lessonname']
+        title=json.loads(request.body.decode('utf-8'))['title']
+        ddl=json.loads(request.body.decode('utf-8'))['ddl']
+        context=json.loads(request.body.decode('utf-8'))['context']
+        checking_list_raw=json.loads(request.body.decode('utf-8'))['list']
+        checking_permission=json.loads(request.body.decode('utf-8'))['permission'] #yes or no
         checking_list = []
         users_list=list(Lessons.objects.get(lesson_name=lessons_name).students.all())
         user_status={}
         for user in users_list:
             user_status[user.username]=-1
-        user_status=str(user_status)
+        user_status=json.dumps(user_status)
         if checking_permission =="no":
             for item in json.loads(checking_list_raw):
                 start=datetime.datetime.strptime(item['starttime'], "%Y-%m-%d %H:%M")
@@ -393,7 +393,7 @@ def assignment_distribute(request):
                 newitem['curcnt']=0
                 checking_list.append(newitem)
         assignment=Assignment(distributor=distributor,lessons_name=lessons_name,title=title,ddl=ddl,context=context,
-                              checking_list=checking_list,checking_permission=checking_permission,user_status=user_status)
+                              checking_list=json.dumps(checking_list),checking_permission=checking_permission,user_status=user_status)
         assignment.save()
         response['status'] = 'success'
     except Exception as e:
@@ -405,8 +405,8 @@ def assignment_distribute(request):
 def assignment_display_for_user(request):
     response = {}
     try:
-        username=request.session['username']
-        lesson_name=request.session['lessonname']
+        username=json.loads(request.body.decode('utf-8'))['username']
+        lesson_name=json.loads(request.body.decode('utf-8'))['lessonname']
         lesson=Lessons.objects.get(lesson_name=lesson_name)
         assignment_list=list(Assignment.objects.filter(lessons=lesson))
         result=[]
@@ -434,8 +434,8 @@ def assignment_display_for_user(request):
 def  assignment_check_for_teacher(request):
     response = {}
     try:
-        username = request.session['username']
-        lesson_name = request.session['lessonname']
+        username = json.loads(request.body.decode('utf-8'))['username']
+        lesson_name = json.loads(request.body.decode('utf-8'))['lessonname']
         lesson = Lessons.objects.get(lesson_name=lesson_name)
         assignment_list = list(Assignment.objects.filter(lessons=lesson))
         result = []
@@ -464,10 +464,10 @@ def  assignment_check_for_teacher(request):
 def assignment_check(request):
     response = {}
     try:
-        username = request.session['username']
-        lesson_name = request.session['lessonname']
+        username = json.loads(request.body.decode('utf-8'))['username']
+        lesson_name = json.loads(request.body.decode('utf-8'))['lessonname']
         lesson = Lessons.objects.get(lesson_name=lesson_name)
-        hwid=request.session['hwid']
+        hwid=json.loads(request.body.decode('utf-8'))['hwid']
         assignment=Assignment.objects.get(hwid=hwid)
         tmp_result={}
         tmp_result['title'] = assignment.title
@@ -478,7 +478,7 @@ def assignment_check(request):
         tmp_result['userstatus'] = assignment.userstatus
         tmp_result['checking_list'] = assignment.checking_list
         tmp_result['context'] = assignment.context
-        response['result']=json.dumps(tmp_result)
+        response['result']=tmp_result
         response['status'] = 'success'
     except Exception as e:
         print(repr(e))
@@ -489,11 +489,11 @@ def assignment_check(request):
 def assignment_upload(request):
     response = {}
     try:
-        username = request.session['username']
-        lesson_name = request.session['lessonname']
+        username = json.loads(request.body.decode('utf-8'))['username']
+        lesson_name = json.loads(request.body.decode('utf-8'))['lessonname']
         lesson = Lessons.objects.get(lesson_name=lesson_name)
-        hwid = request.session['hwid']
-        index=request.session['index']
+        hwid = json.loads(request.body.decode('utf-8'))['hwid']
+        index=json.loads(request.body.decode('utf-8'))['index']
         assignment = Assignment.objects.get(hwid=hwid)
         checking_list=json.loads(assignment.checking_list)
         checking_dict=checking_list[index]
@@ -506,8 +506,8 @@ def assignment_upload(request):
             curr_status = json.loads(assignment.userstatus)
             curr_status[username] = index
             checking_list[index]['curcnt']+=1
-            assignment.userstatus = json.dumps(curr_status)
-            assignment.checking_list=json.dumps(checking_list)
+            assignment.userstatus = curr_status
+            assignment.checking_list=checking_list
             assignment.save()
             response['status'] = 'success'
     except Exception as e:
@@ -519,9 +519,9 @@ def assignment_upload(request):
 def assignment_remove(request):
     response = {}
     try:
-        distributor = request.session['username']
-        lessons_name = request.session['lessonname']
-        title = request.session['title']
+        distributor = json.loads(request.body.decode('utf-8'))['username']
+        lessons_name = json.loads(request.body.decode('utf-8'))['lessonname']
+        title = json.loads(request.body.decode('utf-8'))['title']
         Assignment.objects.filter(distributor=distributor,lessons_name=lessons_name,title=title)[0].delete()
         response['status'] = 'success'
     except Exception as e:
@@ -533,10 +533,10 @@ def assignment_remove(request):
 def chat_save(request):
     response={}
     try:
-        username = request.session['username']
-       # lesson_name = request.session['lessonname']
-        group_id = request.session['groupid']
-        context = request.session['ctx']
+        username = json.loads(request.body.decode('utf-8'))['username']
+       # lesson_name = json.loads(request.body.decode('utf-8'))['lessonname']
+        group_id = json.loads(request.body.decode('utf-8'))['groupid']
+        context = json.loads(request.body.decode('utf-8'))['ctx']
         group=Group.objects.get(group_id=group_id)
         user=UserProfile.objects.get(username=username)
         chat=Chat(group=group,user=user,context=context)
@@ -551,8 +551,8 @@ def chat_save(request):
 def chat_record(request):
     response = {}
     try:
-        username = request.session['username']
-        lesson_name = request.session['lessonname']
+        username = json.loads(request.body.decode('utf-8'))['username']
+        lesson_name = json.loads(request.body.decode('utf-8'))['lessonname']
         lesson=Lessons.objects.get(lesson_name=lesson_name)
         user = UserProfile.objects.get(username=username)
         group=Group.objects.get(lessons=lesson,users=user)
