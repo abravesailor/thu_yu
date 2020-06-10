@@ -3,7 +3,7 @@
   <div id="app">
     <div class="panel panel-primary" >
       <div class="panel-heading">
-        <h3 class="panel-title">作业列表</h3>
+        <h3 class="panel-title">{{classname}}-作业列表</h3>
       </div>
       <div class="panel-body form-inline" v-if="isteacher">
         <input type="button" value="发布作业" class="btn btn-primary" @click="add">
@@ -23,16 +23,16 @@
       width="200">
     </el-table-column>
     <el-table-column
-      prop="teacher"
+      prop="distributor"
       label="发布者"
       align = "center"
       width="120">
     </el-table-column>
     <el-table-column
-      prop="time"
+      prop="ddl"
       label="提交截止时间"
       align = "center"
-      width="120">
+      width="200">
     </el-table-column>
     <el-table-column
       label="查看详情"
@@ -71,10 +71,10 @@
       width="120">
     </el-table-column>
     <el-table-column
-      prop="time"
+      prop="ddl"
       label="提交截止时间"
       align = "center"
-      width="120">
+      width="200">
     </el-table-column>
     <el-table-column
       prop="submitted"
@@ -101,15 +101,26 @@ export default {
   name: "classes",
   data() {
     return {
-      tableData: [
-        { title: "标题1", distributor: "老师1", ddl: "时间1", msgid: "1", passddl: false, submitted: "已提交"},
-        { title: "标题2", distributor: "老师2", ddl: "时间2", msgid: "2", passddl: false, submitted: "已提交"},
-        { title: "标题3", distributor: "老师3", ddl: "时间3", msgid: "3", passddl: false, submitted: "已提交"},
-        { title: "标题4", distributor: "老师4", ddl: "时间4", msgid: "4", passddl: true, submitted: "未提交"}
-      ],
+      tmpData: [],
       keywords: "",
-      isteacher: Boolean(Number(window.sessionStorage.isteacher))
+      isteacher: Boolean(Number(window.sessionStorage.isteacher)),
+      classname: "课程1"
     };
+  },
+  computed: {
+    tableData()
+    {
+      var ret = []
+      for (var i = 0; i < this.tmpData.length; i++)
+      {
+        ret.push(this.tmpData[i]);
+        if (this.tmpData[i].upload_status == "False")
+          ret[i].submitted = "未提交";
+        else
+          ret[i].submitted = "已提交";
+      }
+      return ret;
+    }
   },
   methods: {
     add() {
@@ -144,7 +155,7 @@ export default {
     handleClick(row, idx) {
       console.log(row)
       console.log(idx)
-      var url = this.$route.path+this.tableData[idx].msgid;
+      var url = this.$route.path+this.tableData[idx].hwid;
       this.$router.push(url);
     },
 
@@ -158,8 +169,37 @@ export default {
 
 
     handleClickDelete(row, idx) {
-      console.log(row)
-      console.log(idx)
+      this.$confirm('确认删除该作业?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var _this = this
+          var dat = _this.tableData[idx];
+          $.ajax({
+            type: 'post',
+            url: '/api/assignment_display_for_user_ajax',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({lessonname: this.$route.params.classid, username: dat.distributor, title: dat.title}),
+            dataType: 'json',
+            success: function (data) {
+              window.location.reload();
+            },
+            error: function (data) {
+              _this.$notify({
+                title: '提示',
+                message: '网络链接失败！'
+              })
+            }
+          })
+          
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
+      
     },
     getinfo: function () {
       var _this = this
@@ -170,8 +210,8 @@ export default {
         data: JSON.stringify({classid: this.$route.params.classid, username: window.sessionStorage.login}),
         dataType: 'json',
         success: function (data) {
-          _this.tableData = data.result;
-          console.log(_this.tableData);
+          _this.tmpData = data.result;
+          console.log(data.result);
         },
         error: function (data) {
           _this.$notify({

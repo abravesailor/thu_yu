@@ -16,6 +16,7 @@ import eleorder from '@/components/eleorder.vue'
 import register from '@/components/register.vue'
 import changepwd from '@/components/changepassword.vue'
 import profile from '@/components/person.vue'
+import chatpage from '@/components/HChat.vue'
 Vue.use(Router)
 const Login = resolve => require(['@/views/login'], resolve)
 
@@ -33,10 +34,12 @@ let router = new Router({
       type: 'login',
       component: Login
     },
+    /*
     {
       path: '*',
       component: NotFound
     },
+    */
     {
       path: '/',
       type: 'home',
@@ -190,6 +193,21 @@ let router = new Router({
           menuShow: false,
           teacherShow: false,
           studentShow: false,
+        },
+        {
+          path: 'chatroom',
+          name: '小组讨论',
+          stuname: '小组讨论',
+          components: {
+            default: chatpage,
+            top: TopNav,
+            aside: LeftNav
+          },
+          leaf: true,
+          iconCls: 'el-icon-menu',
+          menuShow: false,
+          teacherShow: false,
+          studentShow: true,
         },
         {
           path: ':hwid',

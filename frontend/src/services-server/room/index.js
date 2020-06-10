@@ -5,7 +5,7 @@ let Info = require('./model')
 class RoomCollection {
   constructor () {
     this.collections = []
-    for (let index = 0; index < 10; index++) {
+    for (let index = 0; index < 100; index++) {
       let room = new Info(index, 'name' + index)
       this.collections.push(room)
     }

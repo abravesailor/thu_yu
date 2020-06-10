@@ -122,7 +122,7 @@
         ses.setItem('password', password)
         //ses.setItem('auth', data.permission)
         this.$store.state.isteacher = true;
-        ses.setItem('isteacher', true);
+        ses.setItem('isteacher', 0);
         if (window.sessionStorage.login === username) {
           _this.$router.push('/classes')
         }

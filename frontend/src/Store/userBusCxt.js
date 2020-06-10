@@ -11,6 +11,7 @@ class UserBusCxt {
     })
   }
   registerUser (userId, userName) {
+    console.log(userId, userName);
     this.cxt.registerUser(userId, userName)
   }
   closeConn () {

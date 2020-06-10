@@ -15,6 +15,8 @@ import * as stores from './store'
 //import store from './store.js'
 import { Keys } from './uitls'
 import { getCxt } from './services-client'
+import VueScroller from 'vue-scroller'
+Vue.use(VueScroller)
 
 Vue.config.productionTip = false
 let initRoomInfo = Keys.SETROOMINFO
@@ -68,13 +70,6 @@ new Vue({
   template: '<App/>',
   render: h => h(App),
   created: function () {
-    //let self = this
-    //getCxt().createIo(this, function (roomInfo) {
-    //  stores.busCxt.init() /** 初始化view与service层的交互层(业务层) */
-    //  self.$store.dispatch(initRoomInfo, roomInfo)
-    //  getCxt().refUsers(function (users) {
-    //    stores.busCxt.userCxt.refUsers(users)
-    //  })
-    //})
+    
   }
 })

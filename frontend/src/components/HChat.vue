@@ -1,22 +1,14 @@
 <template>
     <div class="wrap">
         <div class="wrap-main">
-            <div class="msg-list">
-                <MsgList 
-                :getUpperData="getUpperData"
-                :getUnderData="getUnderData">
+            <div class="msg-list" id="scrolltest" style="overflow: auto">
+                <MsgList>
                 </MsgList>
             </div>
             <div class="msg-input">
-                <MsgWr/>
+                <MsgWr @submit-add="newadd">
+                </MsgWr>
             </div>
-        </div>
-        <div class="wrap-left">
-            <ul class="list-group" >
-                <li class="list-group-item" v-for=" user in getUsers" >
-                    {{user.name}}
-                </li>
-            </ul>
         </div>
     </div>
 </template>
@@ -25,7 +17,13 @@
   import MsgWr from './Message/MsgWriter'
   import { mapGetters } from 'vuex'
   import { Keys } from '../uitls'
+  import { getCxt } from '../services-client'
+  import * as stores from '../store'
   let getUsers = Keys.GETUSERS
+  import { getBusCxt } from '../store'
+  let currRoom = Keys.GETROOMINFO
+  let initRoomInfo = Keys.SETROOMINFO
+  let recKey = Keys.GETNEWMSG
 
   export default {
     name: 'HChat',
@@ -33,10 +31,39 @@
       MsgList,
       MsgWr
     },
+    data() {
+      return {
+        username: window.sessionStorage.login
+      }
+    },
     computed: {
-      ...mapGetters([getUsers])
+      ...mapGetters([getUsers]),
+      ...mapGetters([currRoom]),
+      ...mapGetters([recKey]),
+      msg() {
+            console.log("GNMchange");
+            this.$nextTick(function(){
+                var div = document.getElementById('scrolltest');
+                div.scrollTop = div.scrollHeight;
+                
+            });
+            return this.getNewMsg.length;
+      }
     },
     methods:{
+      newadd: function(val)
+      {
+        console.log("shoudaole");
+        //$("div").scrollTop(10000);
+        //var div = docck();ument.getElementById('msg_end');
+        //div.cli
+        //div.scrollTop = 1000000;
+        this.$nextTick(function(){
+        var div = document.getElementById('scrolltest');
+        div.scrollTop = div.scrollHeight;
+        })
+      },
+
     //向上滚动加载数据
     getUpperData(){
       var me = this;
@@ -110,38 +137,42 @@
         me.underTimes++;
       })
     }
+    },
+
+    created() {
+      
+      
+    },
+
+    destroyed()
+    {
+      console.log("logout");
+      //getBusCxt().userCxt.closeConn();
     }
 
   
   }
 </script>
 <style lang="scss" scoped >
-    $left-width: 200px;
-    $msg-list-height:80%;
-    $msg-input-height:20%;
+    $left-width: 20px;
+    $msg-list-height:450px;
+    $msg-input-height:120px;
     $msg-border: 10px solid #58B7FF;
     $msg-radius:5px;
 
     .wrap{
         height:100%;
     }
-    .wrap-left{ 
-        width: $left-width; 
-        float:left;
-        height:100%;  
-        margin-left: -100%;
-        background: linear-gradient(#20A0FF,#58B7FF);
-    }
     .wrap-main{ 
         float:left;
         padding-left: $left-width;
         height:100%;
-        width:100%; /*因为float了，必须要有width，否则宽度为0px*/
+        width:750px; /*因为float了，必须要有width，否则宽度为0px*/
         text-align:left;
     }
     .msg-list{
         height: $msg-list-height;
-        border: $msg-border; 
+        border: $msg-border;
     }
     .msg-input{
         height: $msg-input-height;

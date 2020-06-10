@@ -7,10 +7,15 @@
       </div>
       <div class="panel-body form-inline">
         <el-row>
-          <el-col :span="12"><input type="button" value="预约时间" class="btn btn-primary" @click="add"></el-col>
-          <el-col :span="30">已预约时间： {{dated}} </el-col>
-          <el-col :span="30"><el-button @click="handleClick()">点击返回</el-button></el-col>
-        
+          <el-col :span="8"><input type="button" value="预约时间" class="btn btn-primary" @click="add"></el-col>
+          <el-col :span="8"><el-button @click="handleClick()">点击返回</el-button></el-col>
+          <el-col :span="15">
+          已预约时间： {{dated}} 
+          <br>
+          作业标题： {{title}}
+          <br>
+          详细信息： {{ctx}}
+        </el-col>
       </el-row>
       </div>
     </div>
@@ -30,23 +35,21 @@
     </el-table-column>
     <el-table-column
       prop="time"
-      label="时间"
+      label="时间段"
       align = "center"
       width="200">
     </el-table-column>
     <el-table-column
-      label="勾选分组"
+      label="选择时间段"
       align = "center"
       type = "selection"
       width="200">
     </el-table-column>
     <el-table-column
-      label="取消分组"
+      label="时间段剩余人数"
       align = "center"
+      prop="number"
       width="200">
-      <template slot-scope="scope">
-        <el-button @click="delgroup(scope.$index)" type="text" size="medium">取消分组</el-button>
-      </template>
     </el-table-column>
   </el-table>
 
@@ -59,14 +62,11 @@ export default {
   name: "classes",
   data() {
     return {
-      tableData: [
-        { date: "2020.6.1", time: "15:00-15:30", number: 1},
-        { date: "2020.6.1", time: "15:30-16:00", number: 1},
-        { date: "2020.6.1", time: "16:00-16:30", number: 1},
-        { date: "2020.6.1", time: "16:30-17:00", number: 1}
-      ],
+      tmpData: [],
       checked: -1,
       ordered: -1,
+      tmpStatus: [],
+      username: window.sessionStorage.login
     };
   },
   computed: {
@@ -76,8 +76,23 @@ export default {
       }
       else
       {
-        return this.ordered.date + ' ' + this.ordered.time
+        return this.tableData[this.ordered].date + ' ' + this.tableData[this.ordered].time
       }
+    },
+    tableData: function()
+    {
+      var ret = []
+      for (var i = 0; i < this.tmpData.length; i++)
+      {
+        ret.push(this.tmpData[i]);
+        console.log(this.tmpData[i]);
+        ret[i].date = this.tmpData[i].starttime.substr(0, 10);
+        ret[i].time = this.tmpData[i].starttime.substr(11, 5) + '-' + this.tmpData[i].endtime.substr(11, 5);
+        ret[i].number = this.tmpData[i].cnt - this.tmpData[i].curcnt;
+      }
+      console.log(ret)
+      return ret;
+
     }
   },
   methods: {
@@ -91,14 +106,38 @@ export default {
       }
       else
       {
-        this.ordered = this.checked;
-        console.log(this.ordered);
-        this.$refs.mulTable.toggleRowSelection(this.checked);
-        this.checked = -1;
-        this.$notify({
-              title: '提示',
-              message: '预约成功！'
-            });
+        var _this = this;
+        var hwstr = this.$route.params.hwid;
+        var tmphwid = Number(hwstr.substr(2));
+        console.log(_this.checked);
+        var idx = -1;
+        for (var i = 0; i < _this.tableData.length; i++)
+        {
+          if (_this.checked === _this.tableData[i])
+          {
+            idx = i;
+            break;
+          }
+        }
+        $.ajax({
+          type: 'post',
+          url: '/api/assignment_upload_ajax',
+          contentType: 'application/json; charset=utf-8',
+          data: JSON.stringify({'username': _this.username, 'hwid': tmphwid, 'lessonname': _this.$route.params.classid, 'index': idx}),
+        dataType: 'json',
+        success: function (data) {
+
+          window.location.reload();
+         
+        },
+        error: function (data) {
+          _this.$notify({
+            title: '提示',
+            message: '网络链接失败！'
+          })
+        }
+      })
+
       }
     },
 
@@ -181,26 +220,46 @@ export default {
 
         this.$router.push(newurl);
       },
+      getInfo()
+      {
+        var _this = this
+        var hwstr = this.$route.params.hwid;
+        var tmphwid = Number(hwstr.substr(2));
+        console.log("hwid:" + hwstr);
+        $.ajax({
+        type: 'post',
+        url: '/api/assignment_check_ajax',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({classid: this.$route.params.classid, hwid: tmphwid}),
+        dataType: 'json',
+        success: function (data) {
+          
+          console.log("success");
+          console.log(data.userstatus);
+          _this.tmpData = data.checking_list;
+          _this.tmpStatus = JSON.parse(data.userstatus);
+          _this.ordered = _this.tmpStatus[_this.username];
+          _this.title = data.title;
+          _this.ctx = data.context
+          console.log(data.checking_list);
+          console.log(data.userstatus);
+          console.log(_this.ordered);
+          console.log(_this.tmpData);
+          console.log(_this.tmpData[0]);
 
-    search(keywords) {
-      var newtableData = [];
-      // this.tableData.forEach(item => {
-      //     if (item.name.indexOf(keywords) != -1) {
-      //         newtableData.push(item)
-      //     }
-      // });
-      // return newtableData;
-
-      // forEach some fliter findIndex 这些都属于数组的新方法，
-      // 都会对数组的每一项，进行遍历，执行相关的操作
-      return this.tableData.filter(item => {
-        //注意:在ES6中，为字符串提供了一个新方法，叫做 String.prototype.includes("要包含的字符串")
-        // 如果包含，返回true，反之false
-        if (item.id.includes(keywords)) {
-          return item;
+        },
+        error: function (data) {
+          _this.$notify({
+            title: '提示',
+            message: '网络链接失败！'
+          })
         }
-      });
+      })
     }
+  },
+  created () {
+    this.getInfo();
+    //this.isteacher = false;
   }
 };
 </script>

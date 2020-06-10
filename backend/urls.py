@@ -14,9 +14,9 @@ urlpatterns = [
     url(r'person_info_ajax$', views.person_info_ajax, ),
     url(r'modify_ajax$', views.modify_ajax, ),
     url(r'modify_password_ajax$', views.modify_password_ajax, ),
-    url(r'class_list_ajax$', views.classlist_ajax, ),
+    url(r'classlist_ajax$', views.classlist_ajax, ),
     url(r'msglist_ajax$', views.msglist_ajax, ),
-    url(r'fileslist_ajax$', views.filelist_ajax, ),
+    url(r'filelist_ajax$', views.filelist_ajax, ),
     url(r'add_notice_ajax$', views.add_notice, ),
     url(r'group_add_ajax$', views.group_add, ),
     url(r'group_dismiss_ajax$', views.group_dismiss, ),
@@ -30,6 +30,10 @@ urlpatterns = [
     url(r'assignment_remove_ajax$', views.assignment_remove, ),
     url(r'chat_save_ajax$', views.chat_save, ),
     url(r'chat_record_ajax$', views.chat_record, ),
+    url(r'chat_save_ajax$', views.chat_save, ),
+    url(r'upload_ajax$', views.upload, ),
+    url(r'notice_delete_ajax$', views.notice_delete, ),
+    url(r'download_ajax/', views.download_template, ),
 
     # team-related urls
     # url(r'get_team_name_list_ajax$', views.get_team_name_list_ajax),

@@ -3,7 +3,7 @@
   <div id="app">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <h3 class="panel-title">{{classname}}-文件列表</h3>
+        <h3 class="panel-title">文件列表</h3>
       </div>
       <div>
       <el-upload
@@ -17,7 +17,7 @@
         >
       <el-button slot="trigger" size="small" type="primary" @click="clearUpload">选取文件</el-button>
       <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-      <div slot="tip" class="el-upload__tip">单次只能选取一个文件上传</div>
+      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
       </el-upload>
       </div>
     </div>
@@ -28,30 +28,29 @@
     stripe
     style="width: 100%">
     <el-table-column
-      prop="file_name"
+      prop="name"
       label="文件名称"
       align = "center"
-      width="250">
+      width="300">
     </el-table-column>
     <el-table-column
       prop="size"
       label="文件大小"
       align = "center"
-      width="150">
+      width="200">
     </el-table-column>
     <el-table-column
-      prop="create_time"
+      prop="time"
       label="上传时间"
       align = "center"
-      width="200">
+      width="300">
     </el-table-column>
     <el-table-column
       label="下载文件"
       align = "center"
-      width="150">
+      width="200">
       <template slot-scope="scope">
-        <!--<el-button @click="handleClick(scope.row, scope.$index)" type="text" size="medium">下载</el-button>-->
-        <a :href="'/api/download_ajax/?name='+scope.row.file_name">下载</a>
+        <el-button @click="handleClick(scope.row, scope.$index)" type="text" size="medium">下载</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -66,16 +65,15 @@ export default {
   data() {
     return {
       tableData: [
-        { file_name: "文件1", size: "大小1", create_time: "时间1", field: "老师1",fileid: "1"},
-        { file_name: "文件2", size: "大小2", create_time: "时间2", field: "老师1",fileid: "2"},
-        { file_name: "文件3", size: "大小3", create_time: "时间3", field: "老师1",fileid: "3"},
-        { file_name: "文件4", size: "大小4", create_time: "时间4", field: "老师1",fileid: "4"}
+        { name: "文件1", size: "大小1", time: "时间1", fileid: "1"},
+        { name: "文件2", size: "大小2", time: "时间2", fileid: "2"},
+        { name: "文件3", size: "大小3", time: "时间3", fileid: "3"},
+        { name: "文件4", size: "大小4", time: "时间4", fileid: "4"}
       ],
       fileList: [],
       isteacher: Boolean(Number(window.sessionStorage.isteacher)),
       keywords: "",
-      uploadForm: new FormData(),
-      classname: "课程1"
+      uploadForm: new FormData()
     };
   },
   methods: {
@@ -102,7 +100,6 @@ export default {
       console.log(this.uploadForm);
       console.log("file_name",_this.uploadForm.get("file"));
       let data = this.uploadForm;
-      data.append('username', window.sessionStorage.login)
       $.ajax({         
         url: '/api/upload_ajax',         
         type: "POST",
@@ -115,7 +112,7 @@ export default {
             title: '提示',
             message: '上传成功'
           });
-          window.location.reload();
+          //window.location.reload();
         },
         error: function (data) {
           _this.$notify({
@@ -151,7 +148,8 @@ export default {
     },
 
     handleClick(row, idx) {
-      this.$router.push('/api/download_ajax');
+      console.log(row)
+      console.log(idx)
     },
 
     search(keywords) {
@@ -176,7 +174,7 @@ export default {
     getinfo: function () {
       var _this = this
       $.ajax({
-        type: 'post',
+        type: 'get',
         url: '/api/filelist_ajax',
         contentType: 'application/json; charset=utf-8',
         data: JSON.stringify({classid: this.$route.params.classid}),
@@ -194,7 +192,7 @@ export default {
     }
   },
   created () {
-    this.getinfo()
+    //this.getinfo()
   }
 };
 </script>

@@ -9,20 +9,37 @@ class Context {
     this.userId = 1
     this.name = '客户端注册'
     this.roomInfo = null
+    this.groupid = 5
   }
-  createIo (vm, callback) {
+  createIo (vm, callback, groupid) {
     this.vm = vm
     
     let socket = this.io.connect(this.url)
-    let self = this
+    let self = this;
     this.socket = socket
-    socket.on(this.keys.emit.sendRooms, function (roomInfo) {
-      self.roomInfo = roomInfo
-      callback(roomInfo)
+    var tmpgroupid = groupid;
+    console.log("yijinglianjie")
+    console.log(this.keys)
+    socket.on("sendSuccess", function() {
+      console.log("shoudaosuccess")
+      console.log(tmpgroupid)
+      socket.emit("getGroupid", tmpgroupid)
+      console.log(self.keys.emit);
+      socket.on(self.keys.emit.sendRooms, function (roomInfo) {
+        self.roomInfo = roomInfo
+        callback(roomInfo)
+      })
+
     })
+    
     
   }
   registerUser (id, name) {
+    console.log("aaaaa")
+    console.log(id)
+    console.log(name)
+    console.log(this.keys)
+
     this.userId = id
     this.name = name
     this.socket.emit(this.keys.client.registerUser, this.userId, this.name)
@@ -31,10 +48,12 @@ class Context {
     this.socket.on(this.keys.emit.newUser, callback)
   }
   sendMsg (msg) {
+    console.log("sendsth")
     this.socket.emit(this.keys.client.newMsg, msg)
   }
   reciveMsg (callback) {
     this.socket.on(this.keys.emit.notifyMsg, function (msg) {
+      console.log("receivesth")
       callback(msg)
     })
   }

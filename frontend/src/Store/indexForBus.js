@@ -5,6 +5,7 @@ import MsgBusCxt from './msg/msgBusCxt'
 
 class BusCxt {
   constructor () {
+  	console.log("laiguozheli")
     this.servicesCxt = getCxt()
     this.userCxt = new UserBusCxt(this.servicesCxt)
     this.msgCxt = new MsgBusCxt(this.servicesCxt)

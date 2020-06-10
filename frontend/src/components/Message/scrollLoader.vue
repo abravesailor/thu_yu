@@ -1,7 +1,3 @@
-// scrollLoader.vue
-// 滚动加载组件
-
-
 <template>
     <div id="scrollLoader-container" class="container-main">
         <div class="loading" v-if="topLoading">
@@ -26,7 +22,7 @@
             //给slot传一个最小值，保证一开始能出现滚动条
             'minHeight': {
                 type: Number,
-                default: 800
+                default: 600
             }, 
                 
         },

@@ -72,6 +72,7 @@ export default {
           'classid': _this.$route.params.classid,
           'msg_title': _this.ruleForm.title,
           'context': _this.ruleForm.txt,
+          'username': window.sessionStorage.login
         }
         console.log(json);
         return json
@@ -101,7 +102,7 @@ export default {
             if (data.status === 'success') {
               var ses = window.sessionStorage
               
-              console.log("regsuccess");
+              //console.log("regsuccess");
               _this.$alert('公告发布成功！', '发布成功', {
                   confirmButtonText: '确定',
                   callback: action => {

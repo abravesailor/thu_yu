@@ -3,7 +3,7 @@
     <div id="app">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <h3 class="panel-title">公告列表</h3>
+        <h3 class="panel-title">{{classname}}-公告列表</h3>
       </div>
       <div class="panel-body form-inline" v-if="isteacher">
         <input type="button" value="发布公告" class="btn btn-primary" @click="add">
@@ -67,7 +67,8 @@ export default {
         { msg_title: "标题4", teachers: "老师4", create_time: "时间4", msgid: "4", context: "公告4的内容是XXXX"}
       ],
       keywords: "",
-      isteacher: Boolean(Number(window.sessionStorage.isteacher))
+      isteacher: Boolean(Number(window.sessionStorage.isteacher)),
+      classname: "课程1"
     };
   },
   methods: {
@@ -85,19 +86,24 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          var gid = this.tableData[idx].groupid
-      
-          for (var i = 0; i < this.tableData.length; i++)
-          {
-          if (this.tableData[i].groupid == gid)
-          {
-            this.tableData[i].groupid = 0;
-          }
-          }
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+          var _this = this;
+          var tmpid = _this.tableData[id].msgid;
+      $.ajax({
+        type: 'post',
+        url: '/api/notice_delete_ajax',
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({'msgid': tmpid}),
+        dataType: 'json',
+        success: function (data) {
+          window.location.reload();
+        },
+        error: function (data) {
+          _this.$notify({
+            title: '提示',
+            message: '网络链接失败！'
+          })
+        }
+      })
         }).catch(() => {
           this.$message({
             type: 'info',

@@ -3,7 +3,7 @@
   <div id="app">
     <div class="panel panel-primary" v-if="isteacher">
       <div class="panel-heading">
-        <h3 class="panel-title">学生管理</h3>
+        <h3 class="panel-title">{{classname}}-学生管理</h3>
       </div>
       <div class="panel-body form-inline">
         <input type="button" value="添加分组" class="btn btn-primary" @click="add">
@@ -91,7 +91,8 @@ export default {
       keywords: "",
       groupcount: 2,
       checked: [],
-      isteacher: Boolean(Number(window.sessionStorage.isteacher))
+      isteacher: Boolean(Number(window.sessionStorage.isteacher)),
+      classname: "课程1"
     };
   },
   computed:
@@ -218,41 +219,39 @@ export default {
 
     delgroup(idxx) {
 
-      var idx = idxx
+      var idx = this.realData[idxx].group_id;
       this.$confirm('确认解散该学生所在小组?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          var gid = this.tableData[idx].group_id
-      
-          for (var i = 0; i < this.tableData.length; i++)
-          {
-          if (this.tableData[i].group_id == gid)
-          {
-            this.tableData[i].group_id = 0;
-          }
-          }
-          this.$message({
-            type: 'success',
-            message: '解散成功!'
-          });
+
+          var _this = this;
+          $.ajax({
+            type: 'post',
+            url: '/api/group_dismiss_ajax',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({'group_id': idx}),
+            dataType: 'json',
+            success: function (data) {
+              window.location.reload();
+
+  
+            },
+            error: function (data) {
+              _this.$notify({
+                title: '提示',
+                message: '网络链接失败！'
+              })
+            }
+          })
+          
         }).catch(() => {
           this.$message({
             type: 'info',
             message: '已取消'
           });          
         });
-      //console.log(idx)
-      var gid = this.tableData[idx].group_id
-      
-      for (var i = 0; i < this.tableData.length; i++)
-      {
-        if (this.tableData[i].group_id == gid)
-        {
-          this.tableData[i].group_id = 0;
-        }
-      }
     },
 
     del(id) {

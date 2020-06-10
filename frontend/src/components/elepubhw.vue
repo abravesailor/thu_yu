@@ -16,6 +16,7 @@
                     size="small"
                     v-model="ruleForm.ddl"
                     type="date"
+                    value-format="yyyy-MM-dd"
                 ></el-date-picker>
                 </el-form-item>
 
@@ -34,6 +35,7 @@
                       v-model="domain.date"
                       type="date"
                       placeholder="选择日期"
+                      value-format="yyyy-MM-dd"
                       :picker-options="pickerOptions">
                     </el-date-picker>
                   </el-form-item>
@@ -50,6 +52,8 @@
                       range-separator="至"
                       start-placeholder="选择起始时间"
                       end-placeholder="结束时间"
+                      value-format="HH:mm"
+                      format="HH:mm"
                       placeholder="选择时间范围">
 
                     </el-time-picker>
@@ -169,12 +173,32 @@ export default {
         });
       },
     submitForm: function (formName) {
+
       var _this = this
       function GetJsonData () {
         var json = {
           'title': _this.ruleForm.title,
-          'txt': _this.ruleForm.txt,
+          'context': _this.ruleForm.txt,
+          'username': window.sessionStorage.login,
+          'classid': _this.$route.params.classid,
+          'permission': '',
+          'ddl': String(_this.ruleForm.ddl),
+          'list': []
+
         }
+        if (_this.ruleForm.sep) json.permission = 'yes';
+        else  json.permission = 'no';
+        for (var i  = 0; i < _this.ruleForm.domains.length; i++)
+        {
+          var js = {
+            'starttime': String(_this.ruleForm.domains[i].date) + ' ' + String(_this.ruleForm.domains[i].time[0]),
+            'endtime': String(_this.ruleForm.domains[i].date) + ' ' + String(_this.ruleForm.domains[i].time[1]),
+            'cnt': _this.ruleForm.domains[i].cnt
+          }
+          json.list.push(js);
+        }
+        json.list = JSON.stringify(json.list);
+        console.log(json);
         return json
       }
       var gks = 0
@@ -191,34 +215,27 @@ export default {
       if (gks === 1) {
         $.ajax({
           type: 'post',
-          url: '/api/pubmsg_ajax',
+          url: '/api/assignment_distribute_ajax',
           contentType: 'application/json; charset=utf-8',
           data: JSON.stringify(GetJsonData()),
           dataType: 'json',
           success: function (data) {
             if (data.status === 'success') {
               var ses = window.sessionStorage
-              ses.setItem('register', 'success')
-              console.log("regsuccess");
-              _this.$router.push('/');
+              
+              //console.log("regsuccess");
+              _this.$alert('作业发布成功！', '发布成功', {
+                  confirmButtonText: '确定',
+                  callback: action => {
+                 }
+                });
+              _this.goback();
             } else {
-              if (data.username === 'error') {
-                _this.$notify({
-                  title: '提示',
-                  message: '注册失败！请检查用户名！'
-                })
-              } else if (data.StudentID === 'error') {
-                _this.$notify({
-                  title: '提示',
-                  message: '注册失败！请检查学号！'
-                })
-              } else {
                 _this.$notify({
                   title: '提示',
                   message: '后台错误！'
                 })
               }
-            }
           },
           error: function (data) {
             _this.$notify({
